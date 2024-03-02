@@ -27,6 +27,11 @@ function startTimer() {
     if (elapsedTime <= 0) {
       alert('DoomShot Timer Complete!');
       clearInterval(timerInterval);
+    } else {
+      // If the elapsed time is divisible by the interval, take a screenshot
+      if (elapsedTime % (minutesEntered * 60 / 10) === 0) {
+        captureAndDownloadScreenshot(minutesEntered * 60 * 1000);
+      }
     }
   }, 1000); // Update every second
 }
@@ -35,6 +40,41 @@ function updateTimerDisplay() {
   const minutes = Math.floor(elapsedTime / 60);
   const seconds = elapsedTime % 60;
   document.getElementById('timerValue').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Function to capture and download screenshot
+function captureAndDownloadScreenshot(timeSlot) {
+  // const timeSlot = parseInt(message.timeSlot, 10) * 60 * 1000; // Convert minutes to milliseconds
+  const interval = timeSlot / 10; // Divide the time slot into 10 intervals for 10 screenshots
+  let screenshotCount = 0;
+
+  const takeScreenshot = () => {
+    // Capture the visible tab as a JPEG image
+    chrome.tabs.captureVisibleTab(null, {format: 'jpeg'}, (dataUrl) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error capturing screenshot:', chrome.runtime.lastError.message);
+        return;
+      }
+      // Download the captured screenshot
+      chrome.downloads.download({
+        filename: `screenshot_${screenshotCount + 1}.jpg`,
+        url: dataUrl,
+        saveAs: false
+      }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Error downloading screenshot:', chrome.runtime.lastError.message);
+        }
+      }); 
+
+      screenshotCount++;
+      if (screenshotCount < 10) {
+        setTimeout(takeScreenshot, Math.random() * interval); // Schedule next screenshot
+      }
+    });
+  };
+
+  // setTimeout(takeScreenshot, Math.random() * interval); // Start taking screenshots
+  takeScreenshot();
 }
 
 document.addEventListener('DOMContentLoaded', function() {

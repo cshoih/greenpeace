@@ -1,15 +1,15 @@
  {
- "manifest_version": 2,
+ "manifest_version": 3,
  "name": "DoomShot",
  "version": "1.0",
- "permissions": ["activeTab"],
+ "permissions": ["activeTab", "downloads"],
  "content_scripts": [
     {
         "matches": ["<all_urls>"],
         "js": ["content.js"]
     }
     ],
-"browser_action": {
+"action": {
     "default_icon": {
         "16": "img.png",
         "48": "img.png",
